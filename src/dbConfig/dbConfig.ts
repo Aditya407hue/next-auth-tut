@@ -1,9 +1,8 @@
-import { log } from "console";
 import mongoose from "mongoose";
 
 export async function connect() {
   try {
-    mongoose.connect(process.env.MONGO_URI!); // ! this added to make sure typescript that string will be provided
+    mongoose.connect(process.env.MONGO_URI!);
     const connection = mongoose.connection;
 
     connection.on("connected", () => {
@@ -11,13 +10,12 @@ export async function connect() {
     });
 
     connection.on("error", (err) => {
-      console.log(
-        "MongoDB connection error,please make sure DB is up and running" + err
-      );
-      process.exit();
+      console.log("MongoDB connection error" + err);
+
+      process.exit(1);
     });
   } catch (err) {
-    console.log("Something went wrong in connecting to DB");
+    console.log("Something went wrong in connecting to Database");
     console.log(err);
   }
 }

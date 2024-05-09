@@ -2,34 +2,29 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   username: {
-    type: "String",
-    required: [true, "Please enter a username"],
+    type: String,
+    required: [true, "Please provide a username"],
     unique: true,
   },
   email: {
-    type: "String",
-    required: [true, "Please enter an email "],
+    type: String,
+    required: [true, "Please provide a email"],
     unique: true,
   },
   password: {
-    type: "String",
-    required: [true, "Please enter a username"],
+    type: String,
+    required: [true, "Please provide a password"],
   },
-  isVerified: {
-    type: "Boolean",
+  isVerifed: {
+    type: Boolean,
     default: false,
   },
-  isAdmin: {
-    type: "Boolean",
-    default: false,
-  },
-  forgotPasswordToke: String,
-  forgotPasswordExpiry: Date,
+  forgotPasswordToken: String,
+  forgotPasswordTokenExpiry: Date,
   verifyToken: String,
   verifyTokenExpiry: Date,
 });
 
-//Special case for next js is to handle this case we need to check whether the model is created earlier then give that model otherwise create a new model
-const User = mongoose.models.users || mongoose.models("users", userSchema);
+const User = mongoose.model.users || mongoose.model("users", userSchema);
 
 export default User;

@@ -1,29 +1,46 @@
+import User from "@/models/userModel";
 import nodemailer from "nodemailer";
+import bcryptjs from "bcryptjs";
 
 export const sendEmail = async ({ email, emailType, userId }: any) => {
   try {
-    //TODO: configure mailer for usage
-    const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, // Use `true` for port 465, `false` for all other ports
+    const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+    if (emailType === "VERIFY") {
+      await User.findByIdAndUpdate(userId, {
+        verifyToken: hashedToken,
+        verifyTokenExpiry: Date.now() + 360000,
+      });
+    } else if (emailType === "RESET") {
+      await User.findByIdAndUpdate(userId, {
+        forgotPasswordToken: hashedToken,
+        forgotPasswordTokenExpiry: Date.now() + 360000,
+      });
+    }
+    const transport = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "maddison53@ethereal.email",
-        pass: "jn7jnAPss4f63QBp6D",
+        user: "46faeafa9967c2",
+        pass: "342f1c76d8d703",
       },
     });
     const mailOptions = {
-      from: "alphaadi69@gmail.com",
-      to: email,
+      from: "aditya@ethereal.email",
+      to: "bar@example.com, baz@example.com",
       subject:
-        emailType === "VERIFY" ? "Verify your email" : "Reset your password",
-      text: "Hello world?", // plain text body
-      html: "<b>Hello world?</b>", // html body
+        emailType === "Verify" ? "Verify your email" : "Reset your password",
+      html: `<p>Click <a href="${
+        process.env.DOMAIN
+      }/verifyemail?token=${hashedToken}"></a>to ${
+        emailType === "VERIFY" ? "verify your email" : "reset your password"
+      } or copy and paste the link below in your browser <br>
+      ${process.env.DOMAIN}/verifyemail?token=${hashedToken}
+      </p>`,
     };
 
-    const mailResponse = await transporter.sendMail(mailOptions);
+    const mailResponse = await transport.sendMail(mailOptions);
     return mailResponse;
-  } catch (err: any) {
-    throw new Error(err.message);
+  } catch (e: any) {
+    throw new Error(e.message);
   }
 };
